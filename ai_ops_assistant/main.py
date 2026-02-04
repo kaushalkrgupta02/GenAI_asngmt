@@ -1,55 +1,50 @@
 import streamlit as st
-import requests
+from agents.planner import get_planner
+from agents.executor import get_executor
+from agents.verifier import get_verifier
 
-st.title("AI Assistant streamlit App")
+st.title("AI Ops Assistant")
+st.markdown("An intelligent assistant that can fetch weather, news, and jokes based on your queries.")
 
-tab1, tab2 = st.tabs(["OpenWeather API", "Dad Jokes Generator"])
+# User input
+query = st.text_input("Enter your query:", placeholder="e.g., What's the weather in New York and tell me a joke?")
 
-import dotenv
-import os
-dotenv.load_dotenv()
-api_key = os.getenv("APIkey")
-
-with tab1:
-    st.header("Get Weather Data")
-    city = st.text_input("City Name", key="city")
-    
-    if st.button("Get Weather"):
-        if city and api_key:
-            print(api_key)
-            url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}"
-            response = requests.get(url)
-            if response.status_code == 200:
-                data = response.json()
-                st.json(data)
-                # Optionally parse and display key info
-                st.write(f"Location: {data.get('name', 'Unknown')}")
-                st.write(f"Temperature: {data['main']['temp']} K")
-                st.write(f"Weather: {data['weather'][0]['description']}")
-            else:
-                st.error(f"Error: {response.status_code} - {response.text}")
+if st.button("Execute Query"):
+    if not query.strip():
+        st.error("Please enter a valid query.")
+    else:
+        with st.spinner("Planning your request..."):
+            planner = get_planner()
+            plan = planner.create_plan(query)
+        
+        if plan.get("error"):
+            st.error(f"Planning failed: {plan['error']}")
         else:
-            st.error("Please fill all fields")
-
-with tab2:
-    st.header("Search Dad Jokes")
-    term = st.text_input("Search Term (put one word to search)", key="term")
-    
-    if st.button("Search Jokes"):
-        params = {}
-        if term:
-            params["term"] = term
-        headers = {"Accept": "application/json"}
-        url = "https://icanhazdadjoke.com/search"
-        response = requests.get(url, params=params, headers=headers)
-        if response.status_code == 200:
-            data = response.json()
-            jokes = data.get("results", [])
-            if jokes:
-                for joke in jokes:
-                    st.write(joke["joke"])
-                    st.divider()
-            else:
-                st.write("No jokes found.")
-        else:
-            st.error(f"Error: {response.status_code} - {response.text}")
+            st.success(f"Plan created with {len(plan.get('steps', []))} steps.")
+            with st.expander("View Plan Details"):
+                st.json(plan)
+            
+            with st.spinner("Executing the plan..."):
+                executor = get_executor()
+                execution_result = executor.execute_plan(plan)
+            
+            st.info(f"Execution completed: {execution_result['steps_completed']}/{execution_result['total_steps']} steps successful.")
+            
+            with st.spinner("Formatting results..."):
+                verifier = get_verifier()
+                result = verifier.verify_and_format(query, execution_result['step_results'])
+            
+            # Display the formatted answer
+            st.markdown("### Response")
+            st.markdown(result['formatted_answer'])
+            
+            # Show additional info if available
+            if result.get('failed_steps'):
+                with st.expander("Failed Steps"):
+                    for step in result['failed_steps']:
+                        st.write(f"- {step.get('action')}: {step.get('error')}")
+            
+            if result.get('suggestions'):
+                with st.expander("Suggestions"):
+                    for suggestion in result['suggestions']:
+                        st.write(f"- {suggestion}")
