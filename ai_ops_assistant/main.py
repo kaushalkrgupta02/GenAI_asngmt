@@ -48,3 +48,8 @@ if st.button("Execute Query"):
                 with st.expander("Suggestions"):
                     for suggestion in result['suggestions']:
                         st.write(f"- {suggestion}")
+                        
+                        
+ # in the footer and fixed footer alignment issue fix in center
+st.markdown("<style>footer {position: fixed;left: 0;  width: 100%; bottom: 0;  text-align: center;background: black; color: white; padding: 5px 20;}</style>", unsafe_allow_html=True)
+st.markdown("<footer style='text-align: center; margin-top: 20px;'>Your search for the 'Best Match' ends here — Crafted with ❤️ by kaushalkrgupta02.</footer>", unsafe_allow_html=True)

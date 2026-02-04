@@ -5,12 +5,15 @@ Uses LLM to ensure completeness and create user-friendly responses
 
 import logging
 from typing import Any, Dict, List, Optional
+from datetime import datetime
+from agents.base_agent import BaseAgent
+
 from llm.llm_client import get_llm_client
 
 logger = logging.getLogger(__name__)
 
 
-class VerifierAgent:
+class VerifierAgent(BaseAgent):
     """
     The Verifier Agent is responsible for validating execution results
     and formatting them into user-friendly responses.
@@ -24,14 +27,12 @@ class VerifierAgent:
 
     def __init__(self):
         """Initialize the Verifier Agent."""
-        self.llm_client = None
-        self._initialized = False
+        super().__init__()
+        
+    def process(self, original_task: str, execution_results: list) -> Dict[str, Any]:
+        """Process results for verification and formatting."""
+        return self.verify_and_format(original_task, execution_results)
 
-    def _ensure_initialized(self):
-        """Lazy initialization of LLM client."""
-        if not self._initialized:
-            self.llm_client = get_llm_client()
-            self._initialized = True
 
     def verify_and_format(
         self,
@@ -46,7 +47,7 @@ class VerifierAgent:
             execution_results: Results from the Executor Agent (step_results list)
 
         Returns:
-            Verification result with formatted answer
+            Verification result with formatted answer and status
         """
         logger.info("Verifying and formatting execution results")
 
@@ -85,38 +86,31 @@ class VerifierAgent:
 
         try:
             self._ensure_initialized()
-            if self.llm_client is None:
-                return {
-                    "is_complete": False,
-                    "formatted_answer": "Failed to verify results",
-                    "missing_info": ["Unable to verify results due to LLM initialization failure"],
-                    "failed_steps": failed_steps,
-                    "suggestions": ["LLM client not initialized"]
-                }
 
-            # Use LLM to verify and format results
             verification = self.llm_client.verify_results(
                 original_task,
                 step_results
             )
 
-            # Add metadata to verification
-            verification["failed_steps"] = failed_steps
-            verification["successful_steps"] = len(successful_results)
-            verification["total_steps"] = len(step_results)
+            # Process verification result
+            is_complete = verification.get("is_complete", True)
+            formatted_answer = verification.get("formatted_answer", "")
+            missing_info = verification.get("missing_info", [])
+            suggestions = verification.get("suggestions", [])
 
-            # If some steps failed, add note to the answer
-            if failed_steps and verification.get("formatted_answer"):
-                failure_note = self._format_failure_note(failed_steps)
-                verification["formatted_answer"] += failure_note
-
-            return verification
+            return {
+                "is_complete": is_complete,
+                "formatted_answer": formatted_answer,
+                "missing_info": missing_info,
+                "failed_steps": failed_steps,
+                "suggestions": suggestions
+            }
 
         except Exception as e:
             logger.error(f"Verification failed: {e}")
             # Fall back to basic formatting
             return self._basic_format(original_task, step_results, failed_steps)
-
+        
     def _format_all_failed(
         self,
         original_task: str,
@@ -188,13 +182,15 @@ All execution steps failed with the following errors:
             return str(data)
 
     def _format_weather_data(self, data: Dict[str, Any]) -> str:
-        """Format Weather API response."""
+        """Format Weather API response with local and UTC times."""
         if not data.get("success"):
             return f"Error: {data.get('error', 'Unknown error')}"
 
         location = data.get("location", {})
         weather = data.get("weather", {})
         temp = data.get("temperature", {}).get("current", {})
+        sunrise = data.get("sunrise")
+        sunset = data.get("sunset")
 
         lines = [
             f"**{location.get('city', 'Unknown')}, {location.get('country', '')}**",

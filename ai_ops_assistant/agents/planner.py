@@ -6,11 +6,13 @@ Uses LLM to analyze user requests and generate step-by-step JSON plans
 import logging
 from typing import Any, Dict, Optional
 from llm.llm_client import get_llm_client
+from agents.base_agent import BaseAgent
+
 
 logger = logging.getLogger(__name__)
 
 
-class PlannerAgent:
+class PlannerAgent(BaseAgent):
     """
     The Planner Agent is responsible for converting natural language user inputs
     into structured, actionable execution plans.
@@ -24,14 +26,11 @@ class PlannerAgent:
 
     def __init__(self):
         """Initialize the Planner Agent."""
-        self.llm_client = None
-        self._initialized = False
+        super().__init__()
 
-    def _ensure_initialized(self):
-        """Lazy initialization of LLM client."""
-        if not self._initialized:
-            self.llm_client = get_llm_client()
-            self._initialized = True
+    def process(self, user_input: str) -> Dict[str, Any]:
+        """Process user input and create execution plan."""
+        return self.create_plan(user_input)
 
     def create_plan(self, user_input: str) -> Dict[str, Any]:
         """
