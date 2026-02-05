@@ -1,7 +1,7 @@
 # AI Ops Assistant
 
 ## Overview
-The AI Ops Assistant is a versatile system designed to handle a wide range of user queries by leveraging multiple agents and tools. It integrates various APIs to provide information on weather, news, jokes, and more. The system is built with a modular architecture, allowing for easy extension and maintenance.
+The AI Ops Assistant is a versatile system designed to handle a wide range of user queries by leveraging multiple agents and tools. It integrates various APIs to provide information on weather, news, jokes, and more. The system is built with a modular architecture, allowing for easy extension and maintenance. This is runnig on Streamlit for a user-friendly interface, and it utilizes the Groq LLM for natural language understanding and response generation.
 
 ---
 
