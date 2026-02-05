@@ -9,7 +9,7 @@ The AI Ops Assistant is a versatile system designed to handle a wide range of us
 1. Clone the repository:
    ```bash
    git clone https://github.com/kaushalkrgupta02/GenAI_asngmt.git
-   cd GenAI_asngmt/ai_ops_assistant
+   cd GenAI_asngmt
    ```
 2. Create and activate a virtual environment (Optional if you have already Python environment set up):
    ```bash
