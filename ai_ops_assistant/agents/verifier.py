@@ -28,6 +28,7 @@ class VerifierAgent(BaseAgent):
     def __init__(self):
         """Initialize the Verifier Agent."""
         super().__init__()
+        self.llm_client = get_llm_client()
         
     def process(self, original_task: str, execution_results: list) -> Dict[str, Any]:
         """Process results for verification and formatting."""
