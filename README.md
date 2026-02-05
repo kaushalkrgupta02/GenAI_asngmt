@@ -21,7 +21,7 @@ The AI Ops Assistant is a versatile system designed to handle a wide range of us
     pip install -r requirements.txt
    ```
 4. Set up environment variables:
-    - copy the `.env.example` file to `.env` and fill in the required API keys and configurations.
+    - copy the `.env.example` file to `.env` and **fill in the required API keys and configurations**.
 
     ```bash
     cp .env.example .env # On Windows use `copy .env.example .env`
