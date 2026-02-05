@@ -1,3 +1,7 @@
+import warnings
+warnings.filterwarnings("ignore", message="Core Pydantic V1 functionality isn't compatible", module="groq._compat")
+
+
 import streamlit as st
 from agents.planner import get_planner
 from agents.executor import get_executor

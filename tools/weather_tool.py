@@ -130,6 +130,12 @@ class WeatherTool(BaseTool):
     def _kelvin_to_fahrenheit(kelvin: float) -> float:
         """Convert Kelvin to Fahrenheit."""
         return round((kelvin - 273.15) * 9 / 5 + 32, 1)
+    @staticmethod
+    def time_zone_offset_to_hours_minutes(offset_seconds: int) -> str:
+        """Convert timezone offset in seconds to hours and minutes format."""
+        hours = offset_seconds // 3600
+        minutes = (offset_seconds % 3600) // 60
+        return f"{hours:+03}:{abs(minutes):02}"
 
     def _format_weather_response(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -198,8 +204,8 @@ class WeatherTool(BaseTool):
                 "coverage_percent": clouds.get("all")
             },
             "sun": {
-                "sunrise_utc": sys.get("sunrise"),
-                "sunset_utc": sys.get("sunset")
+                "sunrise_local": self.time_zone_offset_to_hours_minutes(sys.get("sunrise")),
+                "sunset_local": self.time_zone_offset_to_hours_minutes(sys.get("sunset")),
             },
             "timezone_offset": data.get("timezone")
         }

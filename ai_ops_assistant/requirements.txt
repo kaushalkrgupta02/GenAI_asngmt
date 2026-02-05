@@ -1,9 +1,0 @@
-requests==2.32.3
-streamlit==1.45.0
-uvicorn==0.23.2
-python-dotenv==1.0.1
-httpx==0.28.1
-pydantic==2.11.4
-openai==1.77.0
-groq==0.24.0
-requests==2.32.3
